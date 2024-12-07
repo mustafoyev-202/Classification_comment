@@ -24,7 +24,7 @@ async def process_comment(request: CommentRequest = Body(...)):
 
         response = {
             "database_result": {
-                "id": int(db_result["id"]), 
+                "id": int(db_result["id"]),
                 "isNew": db_result["isNew"],
             },
             "prediction_result": {

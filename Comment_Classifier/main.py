@@ -16,8 +16,8 @@ load_dotenv()
 
 # Database configuration
 DB_NAME = os.getenv("DB_NAME", "mypostgres")
-DB_USER = os.getenv("DB_USER", "mypostgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "mypassword")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "19032006")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
@@ -31,6 +31,7 @@ pool = SimpleConnectionPool(
     port=DB_PORT
 )
 
+
 def get_connection():
     """Get a database connection from the pool."""
     try:
@@ -39,9 +40,11 @@ def get_connection():
         logger.error("Database connection error: %s", e)
         raise HTTPException(status_code=500, detail="Database connection error.")
 
+
 def release_connection(conn):
     """Release a database connection back to the pool."""
     pool.putconn(conn)
+
 
 # Load VoyageAI API key
 api_key = os.getenv("VOYAGEAI_API_KEY")
@@ -62,10 +65,12 @@ try:
 except Exception as e:
     raise ValueError(f"Failed to initialize VoyageAI client: {str(e)}")
 
+
 # Helper functions
 def sanitize_comment(comment: str) -> str:
     """Sanitize input to prevent SQL injection."""
     return re.sub(r'[^\w\s]', '', comment).strip()
+
 
 def get_or_add_comment(comment: str):
     """Check if a comment exists in the database or add it."""
@@ -87,7 +92,7 @@ def get_or_add_comment(comment: str):
             cursor.execute(insert_query, (sanitized_comment,))
             new_id = cursor.fetchone()[0]
             conn.commit()
-            return {'id': int(new_id), 'isNew': True} 
+            return {'id': int(new_id), 'isNew': True}
     except Exception as e:
         logger.error("Database error: %s", e)
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
@@ -107,7 +112,7 @@ def predict_comment(text: str):
         prediction = loaded_model.predict([embedding])[0]
         confidence = loaded_model.predict_proba([embedding]).max()
 
-        return {"prediction": int(prediction), "confidence": float(confidence)} 
+        return {"prediction": int(prediction), "confidence": float(confidence)}
     except Exception as e:
         logger.error("Prediction failed: %s", e)
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
